@@ -903,7 +903,7 @@ describe('socket.io', function(){
         var dynamic = client(srv,namespace);
         sio.useNamespaceValidator(function(nsp, next) {
           expect(nsp).to.be(namespace);
-          next(null, true);
+          next();
         });
         dynamic.on('error', function(err) {
           expect().fail();
@@ -923,7 +923,7 @@ describe('socket.io', function(){
         var namespace = '/dynamic';
         sio.useNamespaceValidator(function(nsp, next) {
           expect(nsp).to.be(namespace);
-          next(null, false);
+          next('Some Reason');
         });
         sio.on('connect', function(socket) {
           if (socket.nsp.name === namespace) {
@@ -936,7 +936,7 @@ describe('socket.io', function(){
           expect().fail();
         });
         dynamic.on('error', function(err) {
-          expect(err).to.be("Invalid namespace");
+          expect(err).to.be("Invalid namespace: Some Reason");
           done();
         });
       });
@@ -949,7 +949,7 @@ describe('socket.io', function(){
         var namespace = '/dynamic';
         sio.useNamespaceValidator(function(nsp, next) {
           expect(nsp).to.be(namespace);
-          next(new Error(), true);
+          next(new Error('Error created by test'));
         });
         sio.on('connect', function(socket) {
           if (socket.nsp.name === namespace) {
@@ -962,7 +962,7 @@ describe('socket.io', function(){
           expect().fail();
         });
         dynamic.on('error', function(err) {
-          expect(err).to.be("Invalid namespace");
+          expect(err.message).to.be("Invalid namespace: Error created by test");
           done();
         });
       });
